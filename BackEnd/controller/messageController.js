@@ -27,7 +27,7 @@ export const getUserForSideBar = async (req, res) => {
 
     res.json({
       success: true,
-      users: filteedUsers,
+      users: filteredUsers,
       unseenMessages,
     });
   } catch (error) {

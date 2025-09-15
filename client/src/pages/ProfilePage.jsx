@@ -1,16 +1,32 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import assets from "../assets/assets";
+import { AuthContext } from "../../context/AuthContext";
 
 const ProfilePage = () => {
+  const { authUser, updateProfile } = useContext(AuthContext);
+
   const [selectedImg, setSelectedImg] = useState(null);
   const navigate = useNavigate();
-  const [name, setName] = useState("Martin Johnson");
-  const [bio, setBio] = useState("Hi everyone, I am using ChatApp!");
+  const [name, setName] = useState(authUser.fullName || "");
+  const [bio, setBio] = useState(authUser.bio || "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/");
+
+    if (!selectedImg) {
+      await updateProfile({ fullName: name, bio });
+      navigate("/");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(selectedImg);
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      await updateProfile({ fullName: name, bio, profilePic: base64Image });
+      navigate("/");
+    };
   };
   return (
     <div className=" min-h-screen bg-cover bg-no-repeat flex items-center justify-center">
@@ -23,6 +39,7 @@ const ProfilePage = () => {
           className="flex flex-col gap-5 p-10 flex-1"
           action=""
         >
+          <img onClick={() => {navigate("/")}} className="max-w-6 bg-gray-500 rounded-full " src={assets.arrow_icon}/>
           <h3 className="text-lg ">Profile Details</h3>
           <label
             htmlFor="avatar"
@@ -36,7 +53,7 @@ const ProfilePage = () => {
               accept=".png, .jpg, .jpeg"
               hidden
             />
-            <imgs
+            <img
               src={
                 selectedImg
                   ? URL.createObjectURL(selectedImg)
@@ -73,8 +90,10 @@ const ProfilePage = () => {
           </button>
         </form>
         <img
-          className="max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10"
-          src={assets.logo_icon}
+          className={`max-h-44 aspect-square rounded-full my-20 mx-10 max-sm:mt-10 ${
+            selectedImg && "rounded-full"
+          }`}
+          src={authUser?.profilePic || assets.logo_icon}
           alt=""
         />
       </div>
