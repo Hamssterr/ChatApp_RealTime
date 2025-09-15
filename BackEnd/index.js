@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import http from "http";
 import { connectDB } from "./lib/db.js";
-import { Server } from "socket.io";
+import {Server} from "socket.io"
 
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";

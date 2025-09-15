@@ -3,8 +3,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const backendurl = import.meta.env.VITE_BACKEND_URL;
-// axios.defaults.baseURL = backendurl;
+const backendurl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export const AuthContext = createContext();
 
@@ -14,13 +13,12 @@ export const AuthProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socket, setSocket] = useState(null);
 
-  //   Check user authentication
-  // AuthContext.jsx
+  // Check user authentication
   const checkAuth = async () => {
     try {
       const { data } = await axios.get(`${backendurl}/api/auth/checkAuth`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Explicitly set header
+          Authorization: `Bearer ${token}`,
         },
       });
       if (data.success) {
@@ -46,10 +44,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (state, credentials) => {
     try {
-      const { data } = await axios.post(
-        `${backendurl}/api/auth/${state}`,
-        credentials
-      );
+      const { data } = await axios.post(`${backendurl}/api/auth/${state}`, credentials);
       if (data.success) {
         setAuthUser(data.userData);
         setToken(data.token);
@@ -66,7 +61,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  //   Logout function handler and socket disconnection
   const logout = async () => {
     localStorage.removeItem("token");
     setToken(null);
@@ -80,7 +74,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  //   Update Profile function handler
   const updateProfile = async (body) => {
     try {
       const { data } = await axios.put(`${backendurl}/api/auth/update-profile`, body);
@@ -95,17 +88,35 @@ export const AuthProvider = ({ children }) => {
 
   // Connect to Socket.io server
   const connectSocket = (userData) => {
-    if (!userData || socket?.connected) return;
+    if (!userData || socket?.connected) {
+      console.warn("Socket not connected: userData missing or already connected"); // Debug
+      return;
+    }
     const newSocket = io(backendurl, {
-      query: {
-        userId: userData._id,
-      },
+      query: { userId: userData._id },
+      reconnection: true, // Enable reconnection
+      reconnectionAttempts: 5, // Try reconnecting 5 times
+      reconnectionDelay: 1000, // Delay between reconnection attempts
     });
-    newSocket.connect();
     setSocket(newSocket);
 
+    newSocket.on("connect", () => {
+      console.log("Socket connected:", newSocket.id); // Debug
+      newSocket.emit("register", userData._id); // Register user
+    });
+
     newSocket.on("online-users", (users) => {
+      console.log("Online users:", users); // Debug
       setOnlineUsers(users);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("Socket disconnected"); // Debug
+    });
+
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error.message); // Debug
+      toast.error("WebSocket connection failed");
     });
   };
 
@@ -114,6 +125,12 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       checkAuth();
     }
+    return () => {
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+      }
+    };
   }, [token]);
 
   const value = {
