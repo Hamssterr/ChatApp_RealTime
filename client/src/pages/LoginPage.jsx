@@ -15,21 +15,18 @@ const LoginPage = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    setError(null);
-
-    let payload = {};
-    if (currState === "Sign up") {
-      if (!isDataSubmitted) {
-        setIsDataSubmitted(true);
-        return;
-      }
-      payload = { fullName, email, password, bio };
-    } else {
-      payload = { email, password };
+    setError(null); // Clear previous errors
+    if (currState === "Sign up" && !isDataSubmitted) {
+      setIsDataSubmitted(true);
+      return;
     }
-
     try {
-      await login(currState === "Sign up" ? "signup" : "login", payload);
+      await login(currState === "Sign up" ? "signup" : "login", {
+        fullName,
+        email,
+        password,
+        bio,
+      });
     } catch (err) {
       setError(
         err.response?.data?.message || "An error occurred. Please try again."

@@ -1,8 +1,7 @@
-
+import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import validator from "validator";
-import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
 
 // Signup new user

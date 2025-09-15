@@ -3,7 +3,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const backendurl = import.meta.env.VITE_BACKEND_URL;
+const backendurl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export const AuthContext = createContext();
 
