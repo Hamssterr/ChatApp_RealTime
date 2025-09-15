@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import http from "http";
 import { connectDB } from "./lib/db.js";
-import {Server} from "socket.io"
+import { Server } from "socket.io";
 
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
@@ -56,7 +56,11 @@ app.use("/api/messages", messageRouter);
 // Connect to MongoDB
 await connectDB();
 
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 8080;
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+export default server;
