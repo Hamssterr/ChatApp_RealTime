@@ -4,21 +4,27 @@ import cors from "cors";
 import http from "http";
 import { connectDB } from "./lib/db.js";
 import { Server } from "socket.io";
+import dotenv from "dotenv";
 
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
+
+// Load environment variables
+dotenv.config();
 
 // Create Express app and HTTP server
 const app = express();
 const server = http.createServer(app);
 
+// Parse allowed origins from environment variable
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:5173"];
+
 // Initialize Socket.io
 export const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://chat-app-real-time-gamma.vercel.app",
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -37,10 +43,10 @@ io.on("connection", (socket) => {
     userSocketMap[userId] = socket.id;
   }
 
-  //  Emit online users
+  // Emit online users
   io.emit("online-users", Object.keys(userSocketMap));
 
-  //  Emit offline users
+  // Emit offline users
   socket.on("disconnect", () => {
     console.log("User disconnected with ID:", userId);
     delete userSocketMap[userId];
@@ -52,10 +58,7 @@ io.on("connection", (socket) => {
 app.use(express.json({ limit: "4mb" }));
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://chat-app-real-time-gamma.vercel.app",
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
