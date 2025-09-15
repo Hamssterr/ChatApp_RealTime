@@ -17,9 +17,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Parse allowed origins from environment variable
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : ["http://localhost:5173"];
+const allowedOrigins = process.env.ALLOWED_ORIGINS;
 
 // Initialize Socket.io
 export const io = new Server(server, {
@@ -27,7 +25,12 @@ export const io = new Server(server, {
     origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Credentials",
+    ],
   },
 });
 
