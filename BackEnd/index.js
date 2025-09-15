@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
 app.use(express.json({ limit: "4mb" }));
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS || "*",
+    origin: process.env.ALLOWED_ORIGINS,
     credentials: true,
     allowedHeaders: [
       "Content-Type",

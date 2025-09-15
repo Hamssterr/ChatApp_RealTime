@@ -12,7 +12,7 @@ export const ChatProvider = ({ children }) => {
 
   const { socket, axios } = useContext(AuthContext);
 
-  const backendurl = import.meta.env.BACKEND_URL || "http://localhost:5000";
+  const backendurl = import.meta.env.VITE_BACKEND_URL;
 
   // Function to get all Users
   const getUsers = async () => {
