@@ -14,7 +14,15 @@ const server = http.createServer(app);
 
 // Initialize Socket.io
 export const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "https://chat-app-real-time-gamma.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  },
 });
 
 // Store online users
@@ -44,7 +52,11 @@ io.on("connection", (socket) => {
 app.use(express.json({ limit: "4mb" }));
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://chat-app-real-time-gamma.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })
