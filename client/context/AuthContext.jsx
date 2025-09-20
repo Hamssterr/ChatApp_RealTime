@@ -87,38 +87,35 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Connect to Socket.io server
-  const connectSocket = (userData) => {
-    if (!userData || socket?.connected) {
-      console.warn("Socket not connected: userData missing or already connected"); // Debug
-      return;
-    }
-    const newSocket = io(backendurl, {
-      query: { userId: userData._id },
-      reconnection: true, // Enable reconnection
-      reconnectionAttempts: 5, // Try reconnecting 5 times
-      reconnectionDelay: 1000, // Delay between reconnection attempts
-    });
-    setSocket(newSocket);
+const connectSocket = (userData) => {
+  if (!userData || socket?.connected) {
+    return;
+  }
 
-    newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id); // Debug
-      newSocket.emit("register", userData._id); // Register user
-    });
+  const newSocket = io(backendurl, {
+    query: { userId: userData._id },
+    withCredentials: true,
+    transports: ["websocket"], // ép dùng websocket
+  });
 
-    newSocket.on("online-users", (users) => {
-      console.log("Online users:", users); // Debug
-      setOnlineUsers(users);
-    });
+  newSocket.on("connect", () => {
+    console.log("✅ Socket connected:", newSocket.id);
+    setSocket(newSocket); // chỉ set sau khi connect thành công
+  });
 
-    newSocket.on("disconnect", () => {
-      console.log("Socket disconnected"); // Debug
-    });
+  newSocket.on("online-users", (users) => {
+    setOnlineUsers(users);
+  });
 
-    newSocket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error.message); // Debug
-      toast.error("WebSocket connection failed");
-    });
-  };
+  newSocket.on("disconnect", () => {
+    console.log("❌ Socket disconnected");
+  });
+
+  newSocket.on("connect_error", (err) => {
+    console.error("Socket connection error:", err.message);
+  });
+};
+
 
   useEffect(() => {
     if (token) {
