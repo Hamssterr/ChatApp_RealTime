@@ -3,7 +3,7 @@
 # Start backend
 cd BackEnd
 npm install
-npm run dev 
+npm run start 
 
 # Start frontend
 cd ../client
